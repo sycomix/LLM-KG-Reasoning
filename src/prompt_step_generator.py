@@ -73,10 +73,13 @@ class StepLogicalPromptGenerator:
         entity2 = e2
         relation1 = r1
         relation2 = r2
-        return {"2i": [f"Which entities are connected to {entity1} by relation {relation1}?",
-                       f"Which entities are connected to {entity2} by relation {relation2}?",
-                       f"What are the entities in the intersection of entity sets [PP1] and [PP2]?"]
-                }
+        return {
+            "2i": [
+                f"Which entities are connected to {entity1} by relation {relation1}?",
+                f"Which entities are connected to {entity2} by relation {relation2}?",
+                "What are the entities in the intersection of entity sets [PP1] and [PP2]?",
+            ]
+        }
     
     def generate_question_3i(self,logical_query):
         e1, r1, e2, r2, e3, r3 = self.parse_logical_query(logical_query,query_type="3i")
@@ -86,22 +89,28 @@ class StepLogicalPromptGenerator:
         relation1 = r1
         relation2 = r2
         relation3 = r3
-        return {"3i": [f"Which entities are connected to {entity1} by relation {relation1}?",
-                       f"Which entities are connected to {entity2} by relation {relation2}?",
-                       f"Which entities are connected to {entity3} by relation {relation3}?",
-                       f"What are the entities in the intersection of entity sets [PP1], [PP2] and [PP3]?"]
-                }
+        return {
+            "3i": [
+                f"Which entities are connected to {entity1} by relation {relation1}?",
+                f"Which entities are connected to {entity2} by relation {relation2}?",
+                f"Which entities are connected to {entity3} by relation {relation3}?",
+                "What are the entities in the intersection of entity sets [PP1], [PP2] and [PP3]?",
+            ]
+        }
 
     def generate_question_2in(self,logical_query):
         e1, r1, e2, r2, e3, r3 = self.parse_logical_query(logical_query,query_type="2in")
         entity1 = e1
         entity2 = e2
         relation1 = r1
-        relation2 = r2 
-        return {"2in": [f"Which entities are connected to {entity1} by any relation other than {relation1}?",
-                        f"Which entities are connected to {entity2} by any relation other than {relation2}?",
-                        f"What are the entities in the intersection of entity sets [PP1] and [PP2]?"]
-                }
+        relation2 = r2
+        return {
+            "2in": [
+                f"Which entities are connected to {entity1} by any relation other than {relation1}?",
+                f"Which entities are connected to {entity2} by any relation other than {relation2}?",
+                "What are the entities in the intersection of entity sets [PP1] and [PP2]?",
+            ]
+        }
 
 
     def generate_question_3in(self,logical_query):
@@ -110,65 +119,80 @@ class StepLogicalPromptGenerator:
         entity2 = e2
         entity3 = e3
         relation1 = r1
-        relation2 = r2 
+        relation2 = r2
         relation3 = r3
-        return {"3in": [f"Which entities are connected to {entity1} by any relation other than {relation1}?",
-                        f"Which entities are connected to {entity2} by any relation other than {relation2}?",
-                        f"Which entities are connected to {entity3} by any relation other than {relation3}?",
-                        f"What are the entities in the intersection of entity sets [PP1], [PP2] and [PP3]?"]
-                }
+        return {
+            "3in": [
+                f"Which entities are connected to {entity1} by any relation other than {relation1}?",
+                f"Which entities are connected to {entity2} by any relation other than {relation2}?",
+                f"Which entities are connected to {entity3} by any relation other than {relation3}?",
+                "What are the entities in the intersection of entity sets [PP1], [PP2] and [PP3]?",
+            ]
+        }
     
     def generate_question_inp(self,logical_query):
         e1, r1, e2, r2, e3, r3 = self.parse_logical_query(logical_query,query_type="inp")
         entity1 = e1
         entity2 = e2
         relation1 = r1
-        relation2 = r2 
+        relation2 = r2
         relation3 = r3
-        return {"inp": [f"Which entities are connected to {entity1} by relation {relation1}?",
-                        f"Which entities are connected to {entity2} by any relation other than {relation2}?",
-                        f"What are the entities in the intersection of entity sets [PP1], and [PP2]?",
-                        f"What are the entities connected to any entity in [PP3] by relation {relation3}?"]
-                }  
+        return {
+            "inp": [
+                f"Which entities are connected to {entity1} by relation {relation1}?",
+                f"Which entities are connected to {entity2} by any relation other than {relation2}?",
+                "What are the entities in the intersection of entity sets [PP1], and [PP2]?",
+                f"What are the entities connected to any entity in [PP3] by relation {relation3}?",
+            ]
+        }  
 
     def generate_question_pin(self,logical_query):
         e1, r1, e2, r2, e3, r3 = self.parse_logical_query(logical_query,query_type="pin")
         entity1 = e1
         entity2 = e2
         relation1 = r1
-        relation2 = r2 
+        relation2 = r2
         relation3 = r3
-        return {"pin": [f"Which entities are connected to {entity1} by relation {relation1}?",
-                        f"Which entities are connected to entity set in [PP1] by relation {relation2}?",
-                        f"Which entities are connected to {entity2} by any relation other than {relation3}?",
-                        f"What are the entities in the intersection of entity sets [PP2] and [PP3]?"]
-               }
+        return {
+            "pin": [
+                f"Which entities are connected to {entity1} by relation {relation1}?",
+                f"Which entities are connected to entity set in [PP1] by relation {relation2}?",
+                f"Which entities are connected to {entity2} by any relation other than {relation3}?",
+                "What are the entities in the intersection of entity sets [PP2] and [PP3]?",
+            ]
+        }
 
     def generate_question_pni(self,logical_query):
         e1, r1, e2, r2, e3, r3 = self.parse_logical_query(logical_query,query_type="pni")
         entity1 = e1
         entity2 = e2
         relation1 = r1
-        relation2 = r2 
+        relation2 = r2
         relation3 = r3
-        return {"pni": [f"Which entities are connected to {entity1} by relation {relation1}?",
-                        f"Which entities are connected to any entity in [PP1] by any relation other than {relation2}?",
-                        f"Which entities are connected to {entity2} by relation {relation3}?",
-                        f"What are the entities in the intersection of entity sets [PP2] and [PP3]?"]
-               }  
+        return {
+            "pni": [
+                f"Which entities are connected to {entity1} by relation {relation1}?",
+                f"Which entities are connected to any entity in [PP1] by any relation other than {relation2}?",
+                f"Which entities are connected to {entity2} by relation {relation3}?",
+                "What are the entities in the intersection of entity sets [PP2] and [PP3]?",
+            ]
+        }  
 
     def generate_question_ip(self,logical_query):
         e1, r1, e2, r2, e3, r3 = self.parse_logical_query(logical_query,query_type="ip")
         entity1 = e1
         entity2 = e2
         relation1 = r1
-        relation2 = r2 
+        relation2 = r2
         relation3 = r3
-        return {"ip": [f"Which entities are connected to {entity1} by relation {relation1}?",
-                       f"Which entities are connected to {entity2} by relation {relation2}?",
-                       f"What are the entities in the intersection of entity sets [PP1] and [PP2]?",
-                       f"What are the entities connected to any entity in [PP3] by relation {relation3}?"]
-               } 
+        return {
+            "ip": [
+                f"Which entities are connected to {entity1} by relation {relation1}?",
+                f"Which entities are connected to {entity2} by relation {relation2}?",
+                "What are the entities in the intersection of entity sets [PP1] and [PP2]?",
+                f"What are the entities connected to any entity in [PP3] by relation {relation3}?",
+            ]
+        } 
 
     
     def generate_question_pi(self,logical_query):
@@ -176,62 +200,77 @@ class StepLogicalPromptGenerator:
         entity1 = e1
         entity2 = e2
         relation1 = r1
-        relation2 = r2 
+        relation2 = r2
         relation3 = r3
-        return {"pi": [f"Which entities are connected to {entity1} by relation {relation1}?",
-                       f"Which entities are connected to [PP1] by relation {relation2}?",
-                       f"Which entities are connected to {entity2} by relation {relation3}?",
-                       f"What are the entities in the intersection of entity sets [PP2] and [PP3]?"]
-               }
+        return {
+            "pi": [
+                f"Which entities are connected to {entity1} by relation {relation1}?",
+                f"Which entities are connected to [PP1] by relation {relation2}?",
+                f"Which entities are connected to {entity2} by relation {relation3}?",
+                "What are the entities in the intersection of entity sets [PP2] and [PP3]?",
+            ]
+        }
 
     def generate_question_2u(self,logical_query):
         e1, r1, e2, r2, e3, r3 = self.parse_logical_query(logical_query,query_type="2u")
         entity1 = e1
         entity2 = e2
         relation1 = r1
-        relation2 = r2 
-        return {"2u": [f"Which entities are connected to {entity1} by relation {relation1}?",
-                       f"Which entities are connected to {entity2} by relation {relation2}?",
-                       f"What are the entities in the union of entity sets [PP1] and [PP2]?"]
-                } 
+        relation2 = r2
+        return {
+            "2u": [
+                f"Which entities are connected to {entity1} by relation {relation1}?",
+                f"Which entities are connected to {entity2} by relation {relation2}?",
+                "What are the entities in the union of entity sets [PP1] and [PP2]?",
+            ]
+        } 
     
     def generate_question_up(self,logical_query):
         e1, r1, e2, r2, e3, r3 = self.parse_logical_query(logical_query,query_type="up")
         entity1 = e1
         entity2 = e2
         relation1 = r1
-        relation2 = r2 
+        relation2 = r2
         relation3 = r3
-        return {"up": [f"Which entities are connected to {entity1} by relation {relation1}?",
-                       f"Which entities are connected to {entity2} by relation {relation2}?",
-                       f"What are the entities in the union of entity sets [PP1] and [PP2]?",
-                       f"Which entities are connected to any entity in [PP3] by relation {relation3}?",]
-                }
+        return {
+            "up": [
+                f"Which entities are connected to {entity1} by relation {relation1}?",
+                f"Which entities are connected to {entity2} by relation {relation2}?",
+                "What are the entities in the union of entity sets [PP1] and [PP2]?",
+                f"Which entities are connected to any entity in [PP3] by relation {relation3}?",
+            ]
+        }
 
     def generate_question_nin(self,logical_query):
         e1, r1, e2, r2, e3, r3 = self.parse_logical_query(logical_query,query_type="nin")
         entity1 = e1
         entity2 = e2
         relation1 = r1
-        relation2 = r2 
-        return {"nin": [f"Which entities are connected to {entity1} by any relation other than {relation1}?",
-                        f"Which entities are connected to {entity2} by any relation other than {relation2}?",
-                        f"What are the entities in the intersection of entity sets [PP1] and [PP2]?",
-                        f"Which entities are not in the set of entities [PP3]?",]
-                }
+        relation2 = r2
+        return {
+            "nin": [
+                f"Which entities are connected to {entity1} by any relation other than {relation1}?",
+                f"Which entities are connected to {entity2} by any relation other than {relation2}?",
+                "What are the entities in the intersection of entity sets [PP1] and [PP2]?",
+                "Which entities are not in the set of entities [PP3]?",
+            ]
+        }
     
     def generate_question_nipn(self,logical_query):
         e1, r1, e2, r2, e3, r3 = self.parse_logical_query(logical_query,query_type="nipn")
         entity1 = e1
         entity2 = e2
         relation1 = r1
-        relation2 = r2 
+        relation2 = r2
         relation3 = r3
-        return {"nipn": [f"Which entities are connected to {entity1} by any relation other than {relation1}?",
-                        f"Which entities are connected to {entity2} by any relation other than {relation2}?",
-                        f"What are the entities in the intersection of entity sets [PP1] and [PP2]?",
-                        f"Which entities are connected to any entity in [PP3] by any relation other than {relation3}?",]
-                }
+        return {
+            "nipn": [
+                f"Which entities are connected to {entity1} by any relation other than {relation1}?",
+                f"Which entities are connected to {entity2} by any relation other than {relation2}?",
+                "What are the entities in the intersection of entity sets [PP1] and [PP2]?",
+                f"Which entities are connected to any entity in [PP3] by any relation other than {relation3}?",
+            ]
+        }
 
     def generate_question(self, logical_query, query_type):
         assert (query_type in self.query_structs),f"Only the following {list(self.query_structs.keys())} are supported."

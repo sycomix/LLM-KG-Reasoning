@@ -32,8 +32,7 @@ class GPTAnswer:
                             stop=None,
                             temperature=0,
                         )
-            for choice in completion.choices:
-                answers.append(choice.text)
+            answers.extend(choice.text for choice in completion.choices)
         return answers
 
     def log_answer(self, qtype, premise_questions={}, output_path=""):

@@ -52,12 +52,10 @@ class BaseLLMAnswer:
         for premise_question in premise_questions:
             questions = premise_question["question"]["question"][qtype]
             premise = premise_question["premise"]
-            phase = 1
-            for question in questions:
+            for phase, question in enumerate(questions, start=1):
                 enhanced_premise_question = "".join([premise,question_tag,question,explain_tag])
                 if phase in step_questions: step_questions[phase].append(enhanced_premise_question)
                 else: step_questions[phase] = [enhanced_premise_question]
-                phase += 1
         return step_questions
     
     def swap_question_placeholders(self, questions, step_answers):
@@ -78,7 +76,7 @@ class BaseLLMAnswer:
 
     def generate_step_answer(self, qtype, premise_questions):
         step_questions = self.process_step_question(qtype, premise_questions)
-        if step_questions == None: return []
+        if step_questions is None: return []
         step_answers = {}
         final_phase = 1
         for phase in range(1,len(step_questions)+1):
@@ -181,9 +179,12 @@ class FairLlamaLLMAnswer(BaseLLMAnswer):
 
     def generate_answer(self, premise_question):
         if len(premise_question)<1: return []
-        outputs = self.model.generate(premise_question, max_gen_len=self.max_new_tokens,
-                                      temperature=self.temperature, top_p=self.top_p)
-        return outputs
+        return self.model.generate(
+            premise_question,
+            max_gen_len=self.max_new_tokens,
+            temperature=self.temperature,
+            top_p=self.top_p,
+        )
     
 class AlpacaLlamaLLMAnswer(BaseLLMAnswer):
     def __init__(self, base_model="decapoda-research/llama-7b-hf", 

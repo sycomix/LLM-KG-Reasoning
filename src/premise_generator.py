@@ -329,9 +329,5 @@ class PremiseGenerator:
     def generate_premise(self, entity_set, relation_set, query_type):
         kg_triplets = self.get_premise(entity_set, relation_set)
         filtered_set = self.filter_premise(kg_triplets,entity_set,relation_set, query_type)
-        texts = []
-        # for relation, pairs in agg_triplets.items():
-        #     texts.append(f'The entity pairs {",".join(pairs)} are connected by relation {relation}.')
-        for triplet in filtered_set:
-            texts.append(str((triplet)).strip().replace(" ",""))
+        texts = [str((triplet)).strip().replace(" ","") for triplet in filtered_set]
         return self.premise_tag+",".join(texts)+"\n"+self.premise_end_tag

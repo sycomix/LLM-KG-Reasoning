@@ -15,7 +15,7 @@ def set_logger(save_path, query_name, print_on_screen=False):
     Write logs to checkpoint and console
     '''
 
-    log_file = os.path.join(save_path, '%s.log'%(query_name))
+    log_file = os.path.join(save_path, f'{query_name}.log')
 
     logging.basicConfig(
         format='%(asctime)s %(levelname)-8s %(message)s',
@@ -40,11 +40,10 @@ def index_dataset(dataset_name, force=False):
     base_path = 'data/{0}/'.format(dataset_name)
     files = ['train.txt']
     indexified_files = ['train_indexified.txt']
-    return_flag = True
-    for i in range(len(indexified_files)):
-        if not osp.exists(osp.join(base_path, indexified_files[i])):
-            return_flag = False
-            break
+    return_flag = all(
+        osp.exists(osp.join(base_path, indexified_file))
+        for indexified_file in indexified_files
+    )
     if return_flag and not force:
         print ("index file exists")
         return  
@@ -58,49 +57,47 @@ def index_dataset(dataset_name, force=False):
         file_len = len(lines)
 
     for p, indexified_p in zip(files, indexified_files):
-        fw = open(osp.join(base_path, indexified_p), "w")
-        with open(osp.join(base_path, p), 'r') as f:
-            for i, line in enumerate(f):
-                print ('[%d/%d]'%(i, file_len), end='\r')
-                e1, rel, e2 = line.split('\t')
-                e1 = e1.strip()
-                e2 = e2.strip()
-                rel = rel.strip()
-                rel_reverse = '-' + rel
-                rel = '+' + rel
-                # rel_reverse = rel+ '_reverse'
+        with open(osp.join(base_path, indexified_p), "w") as fw:
+            with open(osp.join(base_path, p), 'r') as f:
+                for i, line in enumerate(f):
+                    print ('[%d/%d]'%(i, file_len), end='\r')
+                    e1, rel, e2 = line.split('\t')
+                    e1 = e1.strip()
+                    e2 = e2.strip()
+                    rel = rel.strip()
+                    rel_reverse = f'-{rel}'
+                    rel = f'+{rel}'
+                                    # rel_reverse = rel+ '_reverse'
 
-                if p == "train.txt":
-                    if e1 not in ent2id.keys():
-                        ent2id[e1] = entid
-                        id2ent[entid] = e1
-                        entid += 1
+                    if p == "train.txt":
+                        if e1 not in ent2id.keys():
+                            ent2id[e1] = entid
+                            id2ent[entid] = e1
+                            entid += 1
 
-                    if e2 not in ent2id.keys():
-                        ent2id[e2] = entid
-                        id2ent[entid] = e2
-                        entid += 1
+                        if e2 not in ent2id.keys():
+                            ent2id[e2] = entid
+                            id2ent[entid] = e2
+                            entid += 1
 
-                    if not rel in rel2id.keys():
-                        rel2id[rel] = relid
-                        id2rel[relid] = rel
-                        assert relid % 2 == 0
-                        relid += 1
+                        if rel not in rel2id:
+                            rel2id[rel] = relid
+                            id2rel[relid] = rel
+                            assert relid % 2 == 0
+                            relid += 1
 
-                    if not rel_reverse in rel2id.keys():
-                        rel2id[rel_reverse] = relid
-                        id2rel[relid] = rel_reverse
-                        assert relid % 2 == 1
-                        relid += 1
+                        if rel_reverse not in rel2id:
+                            rel2id[rel_reverse] = relid
+                            id2rel[relid] = rel_reverse
+                            assert relid % 2 == 1
+                            relid += 1
 
-                if e1 in ent2id.keys() and e2 in ent2id.keys():
-                    fw.write("\t".join([str(ent2id[e1]), str(rel2id[rel]), str(ent2id[e2])]) + "\n")
-                    fw.write("\t".join([str(ent2id[e2]), str(rel2id[rel_reverse]), str(ent2id[e1])]) + "\n")
-        fw.close()
-
+                    if e1 in ent2id and e2 in ent2id:
+                        fw.write("\t".join([str(ent2id[e1]), str(rel2id[rel]), str(ent2id[e2])]) + "\n")
+                        fw.write("\t".join([str(ent2id[e2]), str(rel2id[rel_reverse]), str(ent2id[e1])]) + "\n")
     with open(osp.join(base_path, "stats.txt"), "w") as fw:
-        fw.write("numentity: " + str(len(ent2id)) + "\n")
-        fw.write("numrelations: " + str(len(rel2id)))
+        fw.write(f"numentity: {len(ent2id)}" + "\n")
+        fw.write(f"numrelations: {len(rel2id)}")
     with open(osp.join(base_path, 'ent2id.pkl'), 'wb') as handle:
         pickle.dump(ent2id, handle, protocol=pickle.HIGHEST_PROTOCOL)
     with open(osp.join(base_path, 'rel2id.pkl'), 'wb') as handle:
@@ -135,7 +132,7 @@ def list2tuple(l):
     return tuple(list2tuple(x) if type(x)==list else x for x in l)
 
 def tuple2list(t):
-    return list(tuple2list(x) if type(x)==tuple else x for x in t)
+    return [tuple2list(x) if type(x)==tuple else x for x in t]
 
 def write_links(dataset, ent_out, small_ent_out, max_ans_num, name):
     queries = defaultdict(set)
@@ -152,13 +149,13 @@ def write_links(dataset, ent_out, small_ent_out, max_ans_num, name):
             else:
                 num_more_answer += 1
 
-    with open('./data/%s/%s-queries.pkl'%(dataset, name), 'wb') as f:
+    with open(f'./data/{dataset}/{name}-queries.pkl', 'wb') as f:
         pickle.dump(queries, f)
-    with open('./data/%s/%s-tp-answers.pkl'%(dataset, name), 'wb') as f:
+    with open(f'./data/{dataset}/{name}-tp-answers.pkl', 'wb') as f:
         pickle.dump(tp_answers, f)
-    with open('./data/%s/%s-fn-answers.pkl'%(dataset, name), 'wb') as f:
+    with open(f'./data/{dataset}/{name}-fn-answers.pkl', 'wb') as f:
         pickle.dump(fn_answers, f)
-    with open('./data/%s/%s-fp-answers.pkl'%(dataset, name), 'wb') as f:
+    with open(f'./data/{dataset}/{name}-fp-answers.pkl', 'wb') as f:
         pickle.dump(fp_answers, f)
     print (num_more_answer)
 
@@ -186,8 +183,9 @@ def ground_queries(dataset, query_structure, ent_in, ent_out, small_ent_in, smal
         num_try += 1
         empty_query_structure = deepcopy(query_structure)
         answer = random.sample(ent_in.keys(), 1)[0]
-        broken_flag = fill_query(empty_query_structure, ent_in, ent_out, answer, ent2id, rel2id)
-        if broken_flag:
+        if broken_flag := fill_query(
+            empty_query_structure, ent_in, ent_out, answer, ent2id, rel2id
+        ):
             num_broken += 1
             continue
         query = empty_query_structure
@@ -220,23 +218,29 @@ def ground_queries(dataset, query_structure, ent_in, ent_out, small_ent_in, smal
         fn_ans_num.append(len(fn_answers[list2tuple(query)]))
 
     print ()
-    logging.info ("{} tp max: {}, min: {}, mean: {}, std: {}".format(mode, np.max(tp_ans_num), np.min(tp_ans_num), np.mean(tp_ans_num), np.std(tp_ans_num)))
-    logging.info ("{} fp max: {}, min: {}, mean: {}, std: {}".format(mode, np.max(fp_ans_num), np.min(fp_ans_num), np.mean(fp_ans_num), np.std(fp_ans_num)))
-    logging.info ("{} fn max: {}, min: {}, mean: {}, std: {}".format(mode, np.max(fn_ans_num), np.min(fn_ans_num), np.mean(fn_ans_num), np.std(fn_ans_num)))
+    logging.info(
+        f"{mode} tp max: {np.max(tp_ans_num)}, min: {np.min(tp_ans_num)}, mean: {np.mean(tp_ans_num)}, std: {np.std(tp_ans_num)}"
+    )
+    logging.info(
+        f"{mode} fp max: {np.max(fp_ans_num)}, min: {np.min(fp_ans_num)}, mean: {np.mean(fp_ans_num)}, std: {np.std(fp_ans_num)}"
+    )
+    logging.info(
+        f"{mode} fn max: {np.max(fn_ans_num)}, min: {np.min(fn_ans_num)}, mean: {np.mean(fn_ans_num)}, std: {np.std(fn_ans_num)}"
+    )
 
-    name_to_save = '%s-%s'%(mode, query_name)
-    with open('./data/%s/%s-queries.pkl'%(dataset, name_to_save), 'wb') as f:
+    name_to_save = f'{mode}-{query_name}'
+    with open(f'./data/{dataset}/{name_to_save}-queries.pkl', 'wb') as f:
         pickle.dump(queries, f)
-    with open('./data/%s/%s-fp-answers.pkl'%(dataset, name_to_save), 'wb') as f:
+    with open(f'./data/{dataset}/{name_to_save}-fp-answers.pkl', 'wb') as f:
         pickle.dump(fp_answers, f)
-    with open('./data/%s/%s-fn-answers.pkl'%(dataset, name_to_save), 'wb') as f:
+    with open(f'./data/{dataset}/{name_to_save}-fn-answers.pkl', 'wb') as f:
         pickle.dump(fn_answers, f)
-    with open('./data/%s/%s-tp-answers.pkl'%(dataset, name_to_save), 'wb') as f:
+    with open(f'./data/{dataset}/{name_to_save}-tp-answers.pkl', 'wb') as f:
         pickle.dump(tp_answers, f)
     return queries, tp_answers, fp_answers, fn_answers
 
 def generate_queries(dataset, query_structures, gen_num, max_ans_num, gen_train, gen_valid, gen_test, query_names, save_name):
-    base_path = './data/%s'%dataset
+    base_path = f'./data/{dataset}'
     indexified_files = ['train_indexified.txt', 'valid_indexified.txt', 'test_indexified.txt']
     if gen_train or gen_valid:
         train_ent_in, train_ent_out = construct_graph(base_path, indexified_files[:1]) # ent_in 
@@ -272,16 +276,34 @@ def generate_queries(dataset, query_structures, gen_num, max_ans_num, gen_train,
     print ('general structure is', query_structure, "with name", query_name)
     if query_structure == ['e', ['r']]:
         if gen_train:
-            write_links(dataset, train_ent_out, defaultdict(lambda: defaultdict(set)), max_ans_num, 'train-'+query_name)
+            write_links(
+                dataset,
+                train_ent_out,
+                defaultdict(lambda: defaultdict(set)),
+                max_ans_num,
+                f'train-{query_name}',
+            )
         if gen_valid:
-            write_links(dataset, valid_only_ent_out, train_ent_out, max_ans_num, 'valid-'+query_name)
+            write_links(
+                dataset,
+                valid_only_ent_out,
+                train_ent_out,
+                max_ans_num,
+                f'valid-{query_name}',
+            )
         if gen_test:
-            write_links(dataset, test_only_ent_out, valid_ent_out, max_ans_num, 'test-'+query_name)
+            write_links(
+                dataset,
+                test_only_ent_out,
+                valid_ent_out,
+                max_ans_num,
+                f'test-{query_name}',
+            )
         print ("link prediction created!")
         exit(-1)
-    
+
     name_to_save = query_name
-    set_logger("./data/{}/".format(dataset), name_to_save)
+    set_logger(f"./data/{dataset}/", name_to_save)
 
     num_sampled, num_try, num_repeat, num_more_answer, num_broken, num_empty = 0, 0, 0, 0, 0, 0
     train_ans_num = []
@@ -296,15 +318,11 @@ def generate_queries(dataset, query_structures, gen_num, max_ans_num, gen_train,
     if gen_test:
         test_queries, test_tp_answers, test_fp_answers, test_fn_answers = ground_queries(dataset, query_structure, 
             test_ent_in, test_ent_out, valid_ent_in, valid_ent_out, gen_num[2], max_ans_num, query_name, 'test', ent2id, rel2id)
-    print ('%s queries generated with structure %s'%(gen_num, query_structure))
+    print(f'{gen_num} queries generated with structure {query_structure}')
 
 def fill_query(query_structure, ent_in, ent_out, answer, ent2id, rel2id):
     assert type(query_structure[-1]) == list
-    all_relation_flag = True
-    for ele in query_structure[-1]:
-        if ele not in ['r', 'n']:
-            all_relation_flag = False
-            break
+    all_relation_flag = all(ele in ['r', 'n'] for ele in query_structure[-1])
     if all_relation_flag:
         r = -1
         for i in range(len(query_structure[-1]))[::-1]:
@@ -312,7 +330,7 @@ def fill_query(query_structure, ent_in, ent_out, answer, ent2id, rel2id):
                 query_structure[-1][i] = -2
                 continue
             found = False
-            for j in range(40):
+            for _ in range(40):
                 r_tmp = random.sample(ent_in[answer].keys(), 1)[0]
                 if r_tmp // 2 != r // 2 or r_tmp == r:
                     r = r_tmp
@@ -335,27 +353,27 @@ def fill_query(query_structure, ent_in, ent_out, answer, ent2id, rel2id):
                 assert i == len(query_structure) - 1
                 query_structure[i][0] = -1
                 continue
-            broken_flag = fill_query(query_structure[i], ent_in, ent_out, answer, ent2id, rel2id)
-            if broken_flag:
+            if broken_flag := fill_query(
+                query_structure[i], ent_in, ent_out, answer, ent2id, rel2id
+            ):
                 return True
-        for structure in same_structure:
-            if len(same_structure[structure]) != 1:
-                structure_set = set()
-                for i in same_structure[structure]:
-                    structure_set.add(list2tuple(query_structure[i]))
+        for structure, value in same_structure.items():
+            if len(value) != 1:
+                structure_set = {
+                    list2tuple(query_structure[i])
+                    for i in same_structure[structure]
+                }
                 if len(structure_set) < len(same_structure[structure]):
                     return True
 
 def achieve_answer(query, ent_in, ent_out):
     assert type(query[-1]) == list
-    all_relation_flag = True
-    for ele in query[-1]:
-        if (type(ele) != int) or (ele == -1):
-            all_relation_flag = False
-            break
+    all_relation_flag = not any(
+        (type(ele) != int) or (ele == -1) for ele in query[-1]
+    )
     if all_relation_flag:
         if type(query[0]) == int:
-            ent_set = set([query[0]])
+            ent_set = {query[0]}
         else:
             ent_set = achieve_answer(query[0], ent_in, ent_out)
         for i in range(len(query[-1])):
@@ -368,15 +386,11 @@ def achieve_answer(query, ent_in, ent_out):
                 ent_set = ent_set_traverse
     else:   
         ent_set = achieve_answer(query[0], ent_in, ent_out)
-        union_flag = False
-        if len(query[-1]) == 1 and query[-1][0] == -1:
-            union_flag = True
+        union_flag = len(query[-1]) == 1 and query[-1][0] == -1
         for i in range(1, len(query)):
             if not union_flag:
                 ent_set = ent_set.intersection(achieve_answer(query[i], ent_in, ent_out))
-            else:
-                if i == len(query) - 1:
-                    continue
+            elif i != len(query) - 1:
                 ent_set = ent_set.union(achieve_answer(query[i], ent_in, ent_out))
     return ent_set
 
@@ -394,11 +408,7 @@ def achieve_answer(query, ent_in, ent_out):
 @click.option('--gen_id', default=0)
 @click.option('--save_name', is_flag=True, default=False)
 @click.option('--index_only', is_flag=True, default=False)
-
 def main(dataset, seed, gen_train_num, gen_valid_num, gen_test_num, max_ans_num, reindex, gen_train, gen_valid, gen_test, gen_id, save_name, index_only):
-    train_num_dict = {'FB15k': 273710, "FB15k-237": 149689, "NELL": 107982}
-    valid_num_dict = {'FB15k': 8000, "FB15k-237": 5000, "NELL": 4000}
-    test_num_dict = {'FB15k': 8000, "FB15k-237": 5000, "NELL": 4000}
     if gen_train and gen_train_num == 0:
         if 'FB15k-237' in dataset:
             gen_train_num = 149689
@@ -407,6 +417,7 @@ def main(dataset, seed, gen_train_num, gen_valid_num, gen_test_num, max_ans_num,
         elif 'NELL' in dataset:
             gen_train_num = 107982
         else:
+            train_num_dict = {'FB15k': 273710, "FB15k-237": 149689, "NELL": 107982}
             gen_train_num = train_num_dict[dataset]
     if gen_valid and gen_valid_num == 0:
         if 'FB15k-237' in dataset:
@@ -416,6 +427,7 @@ def main(dataset, seed, gen_train_num, gen_valid_num, gen_test_num, max_ans_num,
         elif 'NELL' in dataset:
             gen_valid_num = 4000
         else:
+            valid_num_dict = {'FB15k': 8000, "FB15k-237": 5000, "NELL": 4000}
             gen_valid_num = valid_num_dict[dataset]
     if gen_test and gen_test_num == 0:
         if 'FB15k-237' in dataset:
@@ -425,6 +437,7 @@ def main(dataset, seed, gen_train_num, gen_valid_num, gen_test_num, max_ans_num,
         elif 'NELL' in dataset:
             gen_test_num = 4000
         else:
+            test_num_dict = {'FB15k': 8000, "FB15k-237": 5000, "NELL": 4000}
             gen_test_num = test_num_dict[dataset]
     if index_only:
         index_dataset(dataset, reindex)

@@ -7,22 +7,21 @@ import numpy as np
 import argparse
 
 def clean_string(string):
-    clean_str = re.sub(r"[^0-9,]","",string)
-    return clean_str
+    return re.sub(r"[^0-9,]","",string)
 
 import numpy as np
 
 def compute_mrr_score(ground_truth, predictions):
     if len(ground_truth) == len(predictions) == 0:
         return 1
-    reciprocal_ranks = []
-    for i, prediction in enumerate(predictions):
-        if prediction in ground_truth:
-            reciprocal_rank = 1 / (i + 1)
-            reciprocal_ranks.append(reciprocal_rank)
-    if len(reciprocal_ranks) == 0: return 0
-    mrr = sum(reciprocal_ranks)/len(reciprocal_ranks)
-    return mrr
+    if reciprocal_ranks := [
+        1 / (i + 1)
+        for i, prediction in enumerate(predictions)
+        if prediction in ground_truth
+    ]:
+        return sum(reciprocal_ranks)/len(reciprocal_ranks)
+    else:
+        return 0
 
 
 def compute_ndcg_score(ground_truth, predictions, k=5):
@@ -40,8 +39,7 @@ def compute_ndcg_score(ground_truth, predictions, k=5):
     dcg_k = np.sum(relevance_scores / np.log2(np.arange(2, k+2)))
     sorted_ground_truth = sorted(ground_truth, reverse=True)
     idcg_k = np.sum([1 if sample in ground_truth else 0 for sample in sorted_ground_truth[:k]] / np.log2(np.arange(2, k+2)))
-    ndcg_k = dcg_k / idcg_k if idcg_k > 0 else 0
-    return ndcg_k
+    return dcg_k / idcg_k if idcg_k > 0 else 0
 
 def compute_hits_score(ground_truth, predictions, k=1):
     if len(ground_truth) == len(predictions) == 0:
